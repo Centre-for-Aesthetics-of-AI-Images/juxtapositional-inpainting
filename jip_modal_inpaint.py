@@ -1,10 +1,9 @@
-from pathlib import Path
-import modal
-import src.modal_remote.setup as modal_setup
 import src.modal_remote.inpainting as modal_inpainting
+import src.modal_remote.setup as modal_setup
 from src.config import InpaintingConfig
 
 app = modal_setup.app
+
 
 @app.local_entrypoint()
 def jip_inpaint(
@@ -32,4 +31,6 @@ def jip_inpaint(
         preprocessing_strategy=preprocessing_strategy,
         noise_scale=noise_scale,
     )
-    modal_inpainting.inpaint(image_path=input_image_path, mask_path=mask_image_path, config=config)
+    modal_inpainting.inpaint(
+        image_path=input_image_path, mask_path=mask_image_path, config=config
+    )

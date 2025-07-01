@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class FinetuneConfig:
     data_dir: str = "data"
     model_dir: str = "model"
     use_wandb: bool = False
-    
+
     # identifier for pretrained models on Hugging Face
     model_name: str = "black-forest-labs/FLUX.1-dev"
     lora_name: str = "postcard_lora"
@@ -22,6 +23,7 @@ class FinetuneConfig:
     seed: int = 117
     instance_prompt: str = "A postcard of Aarhus the Danish city"
 
+
 @dataclass
 class InpaintingConfig:
     prompt: str = "A building from a postcard of Aarhus"
@@ -34,5 +36,3 @@ class InpaintingConfig:
     grayscale: bool = False
     preprocessing_strategy: str = "none"
     noise_scale: float = 0.5
-
-

@@ -1,4 +1,3 @@
-
 def download_models(config):
     import torch
     from diffusers.pipelines.pipeline_utils import DiffusionPipeline
@@ -16,7 +15,7 @@ def download_models(config):
 def train(config):
     import subprocess
 
-    from accelerate.utils import write_basic_config # type: ignore
+    from accelerate.utils import write_basic_config  # type: ignore
 
     # load data locally
     img_path = config.data_dir
@@ -35,7 +34,7 @@ def train(config):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        with process.stdout as pipe: # type: ignore
+        with process.stdout as pipe:  # type: ignore
             for line in iter(pipe.readline, b""):
                 line_str = line.decode()
                 print(f"{line_str}", end="")
@@ -59,16 +58,16 @@ def train(config):
             f"--instance_data_dir={img_path}",
             f"--output_dir={output_dir}",
             f"--instance_prompt={prompt}",
-            f"--resolution={config.resolution}", # Keep original resolution for now
-            f"--train_batch_size={config.train_batch_size}", 
-            f"--gradient_accumulation_steps={config.gradient_accumulation_steps}", 
+            f"--resolution={config.resolution}",  # Keep original resolution for now
+            f"--train_batch_size={config.train_batch_size}",
+            f"--gradient_accumulation_steps={config.gradient_accumulation_steps}",
             f"--learning_rate={config.learning_rate}",
             f"--lr_scheduler={config.lr_scheduler}",
             f"--lr_warmup_steps={config.lr_warmup_steps}",
             f"--max_train_steps={config.max_train_steps}",
             f"--checkpointing_steps={config.checkpointing_steps}",
             f"--seed={config.seed}",  # increased reproducibility by seeding the RNG
-            "--gradient_checkpointing", # Trade compute for memory
+            "--gradient_checkpointing",  # Trade compute for memory
         ]
         + (
             [
@@ -82,8 +81,9 @@ def train(config):
         ),
     )
 
+
 def finetune(config):
-    """ Finetune an image generation model using LoRA and Dreambooth.
+    """Finetune an image generation model using LoRA and Dreambooth.
     Args:
         config (FinetuneConfig): Configuration for the finetuning process.
     """
@@ -91,4 +91,6 @@ def finetune(config):
     download_models(config)
     print(f"Starting the finetuning process with data from {config.data_dir}...")
     train(config)
-    print(f"Finetuning completed successfully. The model is saved in {config.model_dir}/{config.lora_name}.")
+    print(
+        f"Finetuning completed successfully. The model is saved in {config.model_dir}/{config.lora_name}."
+    )

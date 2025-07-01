@@ -1,10 +1,9 @@
-import modal
-from pathlib import Path
-import src.modal_remote.setup as modal_setup
 import src.modal_remote.finetuning as modal_finetuning
+import src.modal_remote.setup as modal_setup
 from src.config import FinetuneConfig
 
 app = modal_setup.app
+
 
 @app.local_entrypoint()
 def jip_finetune(
@@ -59,7 +58,6 @@ def jip_finetune(
         max_train_steps=max_train_steps,
         checkpointing_steps=checkpointing_steps,
         seed=seed,
-        instance_prompt=instance_prompt
+        instance_prompt=instance_prompt,
     )
     modal_finetuning.finetune(config)
-

@@ -1,164 +1,149 @@
 import argparse
 from pathlib import Path
-from src.config import FinetuneConfig
-import src.datasets.download_data as download_data
-import src.core.finetuning as local_finetuning
+
+from src.datasets import download_data
+
 
 def main():
     """Main function to run the CLI locally."""
     parser = argparse.ArgumentParser(
         description="Download metadata, images, finetune models and perform inpainting locally for the Juxtapositional Inpainting project.",
-        formatter_class=argparse.RawTextHelpFormatter
+        formatter_class=argparse.RawTextHelpFormatter,
     )
-    subparsers = parser.add_subparsers(dest="command", required=True, help="Available commands")
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, help="Available commands"
+    )
 
     # --- Metadata command ---
-    parser_meta = subparsers.add_parser("download-metadata", help="Download metadata files.")
+    parser_meta = subparsers.add_parser(
+        "download-metadata", help="Download metadata files."
+    )
     parser_meta.add_argument(
-        "dataset", 
-        choices=["postcards", "aerial"], 
-        help="The dataset to download metadata for."
+        "dataset",
+        choices=["postcards", "aerial"],
+        help="The dataset to download metadata for.",
     )
     parser_meta.add_argument(
         "--output-dir",
         type=Path,
         default=Path("output/metadata"),
-        help="The directory to save the metadata file in."
+        help="The directory to save the metadata file in.",
     )
     parser_meta.add_argument(
         "--query",
         type=str,
         default="Aarhus",
-        help="The query to use for searching for postcards. Will return all postcards with an exact, case-insensitive match in the title text."
+        help="The query to use for searching for postcards. Will return all postcards with an exact, case-insensitive match in the title text.",
     )
 
     # --- Images command ---
-    parser_images = subparsers.add_parser("download-images", help="Download images from metadata files.")
+    parser_images = subparsers.add_parser(
+        "download-images", help="Download images from metadata files."
+    )
     parser_images.add_argument(
-        "dataset", 
-        choices=["postcards", "aerial"], 
-        help="The dataset to download images for."
+        "dataset",
+        choices=["postcards", "aerial"],
+        help="The dataset to download images for.",
     )
     parser_images.add_argument(
         "--metadata-dir",
         type=Path,
         default=Path("output/metadata"),
-        help="Directory where the metadata JSON files are stored."
+        help="Directory where the metadata JSON files are stored.",
     )
     parser_images.add_argument(
         "--output-dir",
         type=Path,
         default=Path("output/images"),
-        help="The directory to save the downloaded images in."
+        help="The directory to save the downloaded images in.",
     )
 
     # --- Finetuning command ---
-    parser_finetune = subparsers.add_parser("finetune", help="Finetune an image generation model using LoRA and Dreambooth")
+    parser_finetune = subparsers.add_parser(
+        "finetune", help="Finetune an image generation model using LoRA and Dreambooth"
+    )
 
     parser_finetune.add_argument(
         "--instance-prompt",
         type=str,
         default="A postcard of Aarhus the Danish city",
-        help="Prompt for the instance images"
+        help="Prompt for the instance images",
     )
     parser_finetune.add_argument(
         "--model-dir",
         type=Path,
         default=Path.cwd() / "model",
-        help="The directory where the pretrained model is stored"
+        help="The directory where the pretrained model is stored",
     )
     parser_finetune.add_argument(
         "--input-data-dir",
         type=Path,
         default=Path.cwd() / "data" / "input",
-        help="The directory containing the input data"
+        help="The directory containing the input data",
     )
     parser_finetune.add_argument(
         "--use-wandb",
         action="store_true",
-        help="Whether to use Weights & Biases for logging"
+        help="Whether to use Weights & Biases for logging",
     )
     parser_finetune.add_argument(
         "--model-name",
         type=str,
         default="black-forest-labs/FLUX.1-schnell",
-        help="The huggingface-name of the model to finetune"
+        help="The huggingface-name of the model to finetune",
     )
     parser_finetune.add_argument(
         "--lora-name",
         type=str,
         default="postcard_lora",
-        help="The name to save the LoRA model as"
+        help="The name to save the LoRA model as",
     )
     parser_finetune.add_argument(
-        "--resolution",
-        type=int,
-        default=512,
-        help="The resolution of generated images"
+        "--resolution", type=int, default=512, help="The resolution of generated images"
     )
     parser_finetune.add_argument(
-        "--train-batch-size",
-        type=int,
-        default=2,
-        help="Batch size for training"
+        "--train-batch-size", type=int, default=2, help="Batch size for training"
     )
-    parser_finetune.add_argument(
-        "--rank",
-        type=int,
-        default=16,
-        help="LoRA rank"
-    )
+    parser_finetune.add_argument("--rank", type=int, default=16, help="LoRA rank")
     parser_finetune.add_argument(
         "--gradient-accumulation-steps",
         type=int,
         default=1,
-        help="Number of gradient accumulation steps"
+        help="Number of gradient accumulation steps",
     )
     parser_finetune.add_argument(
-        "--learning-rate",
-        type=float,
-        default=4e-4,
-        help="Learning rate"
+        "--learning-rate", type=float, default=4e-4, help="Learning rate"
     )
     parser_finetune.add_argument(
-        "--lr-scheduler",
-        type=str,
-        default="constant",
-        help="Learning rate scheduler"
+        "--lr-scheduler", type=str, default="constant", help="Learning rate scheduler"
     )
     parser_finetune.add_argument(
         "--lr-warmup-steps",
         type=int,
         default=0,
-        help="Number of warmup steps for learning rate"
+        help="Number of warmup steps for learning rate",
     )
     parser_finetune.add_argument(
         "--max-train-steps",
         type=int,
         default=1000,
-        help="Maximum number of training steps"
+        help="Maximum number of training steps",
     )
     parser_finetune.add_argument(
         "--checkpointing-steps",
         type=int,
         default=1000,
-        help="Number of steps between checkpoints"
+        help="Number of steps between checkpoints",
     )
-    parser_finetune.add_argument(
-        "--seed",
-        type=int,
-        default=117,
-        help="Random seed"
-    )
+    parser_finetune.add_argument("--seed", type=int, default=117, help="Random seed")
 
     args = parser.parse_args()
-    
-    # Ensure base output directories exist
-    if hasattr(args, 'output_dir'):
-        args.output_dir.mkdir(parents=True, exist_ok=True)
-    if hasattr(args, 'metadata_dir'):
-        args.metadata_dir.mkdir(parents=True, exist_ok=True)
 
+    # Ensure base output directories exist
+    if hasattr(args, "output_dir"):
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+    if hasattr(args, "metadata_dir"):
+        args.metadata_dir.mkdir(parents=True, exist_ok=True)
 
     if args.command == "download-metadata":
         if args.dataset == "postcards":
@@ -180,9 +165,10 @@ def main():
 
     elif args.command == "finetune":
         raise NotImplementedError()
-    
+
     elif args.commang == "inpaint":
         raise NotImplementedError()
 
+
 if __name__ == "__main__":
-   main()
+    main()

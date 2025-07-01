@@ -1,6 +1,6 @@
 [project]
 name = "juxtapositional-inpainting"
-version = "0.1.0"
+version = "1.0.0"
 description = "CLI tool for LoRA finetuning of image generation models and inpainting with finetuned models."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -19,8 +19,16 @@ dependencies = [
     "peft>=0.15.2",
     "pillow>=11.2.1",
     "pydantic>=2.11.7",
+    "ruff>=0.12.1",
     "sentencepiece>=0.1.91,!=0.1.92",
     "smart-open>=7.1.0",
     "torch>=2.7.1",
     "torchvision>=0.22.1",
 ]
+
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+lint.select = ["E", "F", "W", "I", "UP", "PL", "TID"]
+exclude = ["output", "data", ".venv", "venv", "__pycache__", "pyproject.toml"]

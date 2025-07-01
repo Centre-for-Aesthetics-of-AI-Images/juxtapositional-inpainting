@@ -1,12 +1,14 @@
 import os
+
 import modal
 
 app = modal.App(name="finetune_juxtapositional_inpainting")
 INPUT_DIR = "./data/input"
 
-GIT_SHA = "e649678bf55aeaa4b60bd1f68b1ee726278c0304"  
-finetuning_image = modal.Image.debian_slim(python_version="3.10"
-    ).pip_install(
+GIT_SHA = "e649678bf55aeaa4b60bd1f68b1ee726278c0304"
+finetuning_image = (
+    modal.Image.debian_slim(python_version="3.10")
+    .pip_install(
         "accelerate==0.31.0",
         "datasets~=2.13.0",
         "fastapi[standard]==0.115.4",
@@ -26,54 +28,59 @@ finetuning_image = modal.Image.debian_slim(python_version="3.10"
         "torchvision~=0.16",
         "triton~=2.2.0",
         "wandb==0.17.6",
-    ).apt_install(
-        "git"
-    ).run_commands(
+    )
+    .apt_install("git")
+    .run_commands(
         # Perform a shallow fetch of just the target `diffusers` commit, checking out
         # the commit in the container's home directory, /root. Then install `diffusers`
         "cd /root && git init .",
         "cd /root && git remote add origin https://github.com/huggingface/diffusers",
         f"cd /root && git fetch --depth=1 origin {GIT_SHA} && git checkout {GIT_SHA}",
         "cd /root && pip install -e .",
-    ).env(
-        {"HF_HUB_ENABLE_HF_TRANSFER": "1"}
-    ).add_local_python_source("src").add_local_dir(INPUT_DIR, remote_path="/root/data/input")
+    )
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
+    .add_local_python_source("src")
+    .add_local_dir(INPUT_DIR, remote_path="/root/data/input")
+)
 
 
-inpainting_image = modal.Image.debian_slim(python_version="3.12"
-    ).pip_install(
-        "accelerate",  
-        "diffusers",  
-        "transformers", 
-        "torch",       
-        "torchvision", 
-        "pillow",      
-        "peft",        
+inpainting_image = (
+    modal.Image.debian_slim(python_version="3.12")
+    .pip_install(
+        "accelerate",
+        "diffusers",
+        "transformers",
+        "torch",
+        "torchvision",
+        "pillow",
+        "peft",
         "huggingface-hub",
         "hf_transfer",
         "numpy<2",
         "pydantic",
         "sentencepiece>=0.1.91,!=0.1.92",
-        "triton",      # Keep triton, might be needed
+        "triton",  # Keep triton, might be needed
         # fastapi/starlette kept in case a web endpoint is added later
         "fastapi[standard]",
         "starlette",
-        "ftfy"
-    ).env(
-        {"HF_HUB_ENABLE_HF_TRANSFER": "1"}
+        "ftfy",
     )
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
+)
 
 volume = modal.Volume.from_name(
-        "finetune_juxtapositional_inpainting_volume", create_if_missing=True
-    )
+    "finetune_juxtapositional_inpainting_volume", create_if_missing=True
+)
+
 
 def get_secrets():
-    return [modal.Secret.from_name(
-        "huggingface-secret", required_keys=["HF_TOKEN"]
-    )] + (
-       [modal.Secret.from_name("wandb-secret", required_keys=["WANDB_API_KEY"])]
+    return [
+        modal.Secret.from_name("huggingface-secret", required_keys=["HF_TOKEN"])
+    ] + (
+        [modal.Secret.from_name("wandb-secret", required_keys=["WANDB_API_KEY"])]
         if os.getenv("USE_WANDB")
         else []
     )
+
 
 GPU_SPECS = "A100-80GB"
