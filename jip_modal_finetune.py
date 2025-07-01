@@ -44,7 +44,6 @@ def jip_finetune(
         checkpointing_steps: Number of steps between checkpoints.
         seed: Random seed.
     """
-    print("Entered function")
     config = FinetuneConfig(
         data_dir=input_data_dir,
         use_wandb=use_wandb,

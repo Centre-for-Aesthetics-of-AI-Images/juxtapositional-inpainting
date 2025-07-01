@@ -4,10 +4,8 @@ import modal
 app = modal.App(name="finetune_juxtapositional_inpainting")
 INPUT_DIR = "./data/input"
 
-def get_finetuning_image():
-    # specify the commit to fetch for diffusers for reproducibility
-    GIT_SHA = "e649678bf55aeaa4b60bd1f68b1ee726278c0304"  
-    return modal.Image.debian_slim(python_version="3.10"
+GIT_SHA = "e649678bf55aeaa4b60bd1f68b1ee726278c0304"  
+finetuning_image = modal.Image.debian_slim(python_version="3.10"
     ).pip_install(
         "accelerate==0.31.0",
         "datasets~=2.13.0",
@@ -41,10 +39,8 @@ def get_finetuning_image():
         {"HF_HUB_ENABLE_HF_TRANSFER": "1"}
     ).add_local_python_source("src").add_local_dir(INPUT_DIR, remote_path="/root/data/input")
 
-finetuning_image = get_finetuning_image()
 
-def get_inpainting_image():
-    modal.Image.debian_slim(python_version="3.10"
+inpainting_image = modal.Image.debian_slim(python_version="3.12"
     ).pip_install(
         "accelerate",  
         "diffusers",  
@@ -62,19 +58,14 @@ def get_inpainting_image():
         # fastapi/starlette kept in case a web endpoint is added later
         "fastapi[standard]",
         "starlette",
-        "ftfy",
+        "ftfy"
     ).env(
         {"HF_HUB_ENABLE_HF_TRANSFER": "1"}
     )
 
-inpainting_image = get_inpainting_image()
-
-def get_volume():
-    return modal.Volume.from_name(
+volume = modal.Volume.from_name(
         "finetune_juxtapositional_inpainting_volume", create_if_missing=True
     )
-
-volume = get_volume()
 
 def get_secrets():
     return [modal.Secret.from_name(

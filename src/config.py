@@ -22,4 +22,17 @@ class FinetuneConfig:
     seed: int = 117
     instance_prompt: str = "A postcard of Aarhus the Danish city"
 
+@dataclass
+class InpaintingConfig:
+    prompt: str = "A building from a postcard of Aarhus"
+    input_image_path: str = "data/input_images/paludan_møllers_vej.jpg"
+    mask_image_path: str = "data/masks/paludan_møllers_vej_mask.jpg"
+    output_path: str = "data/output/inpainting/result.png"
+    num_inference_steps: int = 50
+    guidance_scale: float = 7.0
+    strength: float = 0.8
+    grayscale: bool = False
+    preprocessing_strategy: str = "none"
+    noise_scale: float = 0.5
+
 
