@@ -18,8 +18,8 @@ uv sync
 You can scrape and download metadata and images using the local CLI script:
 
 ```bash
-python jip_local.py download-metadata postcards --output-dir output/metadata --query Aarhus
-python jip_local.py download-images postcards --metadata-dir output/metadata --output-dir output/images
+uv run jip_local.py download-metadata postcards --output-dir output/metadata --query Aarhus
+uv run jip_local.py download-images postcards --metadata-dir output/metadata --output-dir output/images
 ```
 
 Replace `postcards` with `aerial` for aerial datasets. See `python jip_local.py --help` for all options.
